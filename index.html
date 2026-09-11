@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MM WBCS ACADEMY-9732974125 MISCELLANEOUS ONLINE MOCK TEST 7</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .hidden { display: none !important; }
+
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; }
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      padding: 15px 0;
+      border-bottom: 2px solid var(--bg);
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+
+    .timer {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--danger);
+    }
+
+    .q-card {
+      margin-bottom: 25px;
+      padding: 15px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+
+    .q-title { font-weight: 600; margin-bottom: 10px; }
+    .options label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-weight: normal;
+    }
+
+    .correct-opt { background: #dcfce7; padding: 6px; border-radius: 4px; }
+    .wrong-opt { background: #fee2e2; padding: 6px; border-radius: 4px; }
+
+    .table-container { overflow-x: auto; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; }
+    th { background: #f1f5f9; }
+
+    @media print {
+      .no-print { display: none !important; }
+      .container { box-shadow: none; max-width: 100%; padding: 0; }
+      .header-bar { position: relative; }
+    }
+  </style>
+
+  <!-- Firebase Modular SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // TODO: Replace with your actual Firebase Project Configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Make Firebase functions globally accessible
+    window.db = db;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+    window.updateDoc = updateDoc;
+    window.increment = increment;
+  </script>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. STUDENT LOGIN FORM -->
+    <div id="login-section">
+      <h2>MM WBCS ACADEMY-9732974125 MISCELLANEOUS ONLINE MOCK TEST 7</h2>
+      <div class="form-group">
+        <label for="student-name">Full Name</label>
+        <input type="text" id="student-name" required placeholder="Enter full name" />
+      </div>
+      <div class="form-group">
+        <label for="student-phone">Registered Phone Number</label>
+        <input type="tel" id="student-phone" required placeholder="Enter 10-digit mobile number" />
+      </div>
+      <button onclick="verifyAndStart()">Start Mock Test</button>
+      <p id="login-err" style="color: var(--danger); font-weight: bold; margin-top: 10px;"></p>
+    </div>
+
+    <!-- 2. EXAM INTERFACE -->
+    <div id="exam-section" class="hidden">
+      <div class="header-bar">
+        <div><strong>Student:</strong> <span id="disp-name"></span></div>
+        <div class="timer">Time Left: <span id="time-disp">90:00</span></div>
+      </div>
+
+      <form id="quiz-form"></form>
+
+      <div class="no-print" style="margin-top: 20px;">
+        <button type="button" onclick="submitTest()">Submit Mock Test</button>
+      </div>
+    </div>
+
+    <!-- 3. RESULT & PREVIEW SECTION -->
+    <div id="result-section" class="hidden">
+      <h2>Test Performance Summary</h2>
+      <div id="score-summary"></div>
+      
+      <div class="no-print" style="margin-top: 15px;">
+        <button onclick="window.print()">Download / Print Preview PDF</button>
+      </div>
+
+      <div id="review-container" style="margin-top: 30px;">
+        <h3>Detailed Question Review</h3>
+        <div id="review-questions"></div>
+      </div>
+
+      <div id="answer-key-table" class="table-container">
+        <h3>Master Answer Key Table</h3>
+        <table>
+          <thead>
+            <tr><th>Q. No</th><th>Correct Answer</th></tr>
+          </thead>
+          <tbody id="ans-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Google Apps Script Web App Deployment URL
+    const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6mtPWuuXRyGXOJXeNF5SvN6hPK3mdOFTc1jbbf4dTvk6poP_8IGutr_q0IW7e5lOUBg/exec";
+
+    // Allowed Eligible Numbers (Purchased Students)
+    const ALLOWED_NUMBERS = [
+      "8759966414","8145053046","7421351001","7421351004","7421351009","7421351016","7421351025","7421351036",
+"7421351049","7421351064","7421351081","7421351100","7421351121","7421351144","8972752901","7076550802",
+"9749402798","9874772380","9093537364","9382719113","7001942262","7478315270","9800477643","7421791001",
+"7421791004","7421791009","7421791016","7421791025","7421791036","7421791049","7421791064","7421791081",
+"7421791100","7421791121","7421791144","9088990506","7029360599","8918901391","8016518417","9339393254",
+"6294038967","8167441990","9647585496","9681442002","9732051169","9547033989","8116090066","7364971515",
+"8370866731","9851362687","7872691497","9734643145","9851209305","8972639408","7001871581","7432068517",
+"8926717457","7908536664","9609611039","8327674562","9051665797","9163286400","6294592503","9064182595",
+"9593772769","9002293294","7029585292","7029585292"
+    ];
+
+    // 100 Questions Loaded From Document
+    const questions = [
+      { id: 1, q: "সিন্ধু সভ্যতার কোন স্থানে একটি সুপরিকল্পিত প্রাচীন বন্দর বা Dockyard-এর নিদর্শন পাওয়া গেছে?", options: ["A) হরপ্পা", "B) মহেঞ্জোদারো", "C) লোথাল", "D) কালীবঙ্গান"], answer: 2 },
+      { id: 2, q: "‘Indica’ গ্রন্থটি কার রচনা?", options: ["A) ফা-হিয়েন", "B) মেগাস্থিনিস", "C) হিউয়েন সাং", "D) প্লিনি"], answer: 1 },
+      { id: 3, q: "অশোকের শিলালিপিতে ব্যবহৃত ‘ধম্ম’ ধারণার মূল উদ্দেশ্য কী ছিল?", options: ["A) শুধুমাত্র বৌদ্ধ ধর্ম প্রচার", "B) সামরিক সম্প্রসারণ", "C) নৈতিক আচরণ ও সামাজিক সম্প্রীতি", "D) বৈদিক যজ্ঞের প্রসার"], answer: 2 },
+      { id: 4, q: "‘Amuktamalyada’ গ্রন্থটির রচয়িতা কে?", options: ["A) কৃষ্ণদেব রায়", "B) আলাউদ্দিন খিলজি", "C) ফিরোজ শাহ তুঘলক", "D) শের শাহ"], answer: 0 },
+      { id: 5, q: "দিল্লি সুলতানি আমলে ‘ইকতা’ ব্যবস্থার সঙ্গে প্রধানত কোন বিষয়টি সম্পর্কিত ছিল?", options: ["A) মুদ্রা নির্মাণ", "B) রাজস্ব আদায় ও প্রশাসনিক দায়িত্ব", "C) সমুদ্র বাণিজ্য", "D) ধর্মীয় বিচার"], answer: 1 },
+      { id: 6, q: "মুঘল প্রশাসনে ‘মনসবদারি ব্যবস্থা’ কোন সম্রাটের আমলে সুসংগঠিত রূপ লাভ করে?", options: ["A) বাবর", "B) হুমায়ুন", "C) আকবর", "D) ঔরঙ্গজেব"], answer: 2 },
+      { id: 7, q: "চিশতি সুফি সম্প্রদায়ের সঙ্গে নিচের কোন ব্যক্তির নাম বিশেষভাবে যুক্ত?", options: ["A) নিজামউদ্দিন আউলিয়া", "B) মুইনুদ্দিন চিশতি", "C) শাহজালাল", "D) শেখ আহমদ সিরহিন্দি"], answer: 1 },
+      { id: 8, q: "1857 সালের বিদ্রোহের তাৎক্ষণিক কারণ হিসেবে কোন ঘটনাটি সবচেয়ে বেশি উল্লেখ করা হয়?", options: ["A) Doctrine of Lapse", "B) Enfield রাইফেলের চর্বিযুক্ত কার্তুজ", "C) ভারী ভূমিরাজস্ব", "D) Permanent Settlement"], answer: 1 },
+      { id: 9, q: "Ilbert Bill বিতর্ক কোন ভাইসরয়ের সময় সংঘটিত হয়?", options: ["A) লর্ড লিটন", "B) লর্ড রিপন", "C) লর্ড কার্জন", "D) লর্ড ডাফরিন"], answer: 1 },
+      { id: 10, q: "2025 সালের Nobel Peace Prize কে পান ?", options: ["A) Maria Corina Machado", "B) Narges Mohammadi", "C) Han Kang", "D) Claudia Goldin"], answer: 0 },
+      { id: 11, q: "2026 Commonwealth Games-এ Indian weightlifters মোট কতটি medal জেতে?", options: ["A) 6", "B) 7", "C) 8", "D) 10"], answer: 2 },
+      { id: 12, q: "ভারতে গান্ধিজির প্রথম সত্যাগ্রহ আন্দোলন কোনটি?", options: ["A) খেদা সত্যাগ্রহ", "B) চম্পারণ সত্যাগ্রহ", "C) আহমেদাবাদ মিল ধর্মঘট", "D) রাওলাট সত্যাগ্রহ"], answer: 1 },
+      { id: 13, q: "Simon Commission-এর বিরুদ্ধে ভারতীয়দের প্রধান আপত্তি কী ছিল?", options: ["A) এতে কোনো ব্রিটিশ সদস্য ছিল না", "B) এতে কোনো ভারতীয় সদস্য ছিল না", "C) এটি স্বাধীনতা ঘোষণা করেছিল", "D) এটি পৃথক নির্বাচকমণ্ডলী বাতিল করেছিল"], answer: 1 },
+      { id: 14, q: "1932 সালের Poona Pact প্রধানত কোন বিষয়ে সম্পর্কিত?", options: ["A) শ্রমিক অধিকার", "B) দলিতদের প্রতিনিধিত্ব ও পৃথক নির্বাচকমণ্ডলী", "C) কৃষক আন্দোলন", "D) দেশীয় রাজ্যগুলির একীকরণ"], answer: 1 },
+      { id: 15, q: "2026 সালে India-এর chairship-এ 13th BRICS Education Ministers’ Meeting কোথায় অনুষ্ঠিত হয়?", options: ["A) New Delhi", "B) Bhubaneswar", "C) Bengaluru", "D) Hyderabad"], answer: 1 },
+      { id: 16, q: "Cabinet Mission ভারতে আসে কোন সালে?", options: ["A) 1942", "B) 1945", "C) 1946", "D) 1947"], answer: 2 },
+      { id: 17, q: "2026 সালের August-এ CBDC-based DBT প্রথম কোন welfare scheme-এর অধীনে Chandigarh ও Dadra & Nagar Haveli-তে চালু করা হয়?", options: ["A) PM-KISAN", "B) PMGKAY", "C) PMAY", "D) PM SVANidhi"], answer: 1 },
+      { id: 18, q: "1947 সালের Mountbatten Plan-এর প্রধান ফলাফল কী?", options: ["A) ভারতকে Dominion Status দেওয়া", "B) ভারত বিভাজনের পরিকল্পনা", "C) পৃথক নির্বাচকমণ্ডলী বিলোপ", "D) Simon Commission প্রত্যাহার"], answer: 1 },
+      { id: 19, q: "ভারতীয় জাতীয় কংগ্রেসের 1929 সালের লাহোর অধিবেশনে কোন ঐতিহাসিক সিদ্ধান্ত নেওয়া হয়?", options: ["A) স্বদেশি আন্দোলন শুরু", "B) পূর্ণ স্বরাজকে লক্ষ্য ঘোষণা", "C) বঙ্গভঙ্গ ঘোষণা", "D) ভারত ছাড়ো আন্দোলন শুরু"], answer: 1 },
+      { id: 20, q: "ভারতের কোন নদী রিফ্ট ভ্যালির মধ্য দিয়ে প্রবাহিত হয়ে পশ্চিমদিকে আরব সাগরে পতিত হয়?", options: ["A) গোদাবরী", "B) নর্মদা", "C) মহানদী", "D) কৃষ্ণা"], answer: 1 },
+      { id: 21, q: "‘Bhabar’ অঞ্চল প্রধানত কোথায় অবস্থিত?", options: ["A) পশ্চিমঘাটের পাদদেশে", "B) শিবালিকের পাদদেশে", "C) আরাবল্লীর পাদদেশে", "D) নীলগিরির পাদদেশে"], answer: 1 },
+      { id: 22, q: "ভারতের কোন মাটিতে লৌহ ও অ্যালুমিনিয়ামের পরিমাণ তুলনামূলকভাবে বেশি এবং প্রবল leaching-এর ফলে তা গঠিত হয়?", options: ["A) পলিমাটি", "B) কালো মাটি", "C) ল্যাটেরাইট মাটি", "D) মরুভূমির মাটি"], answer: 2 },
+      { id: 23, q: "‘Roaring Forties’ বলতে কোন অক্ষাংশ অঞ্চলের প্রবল পশ্চিমা বায়ুকে বোঝায়?", options: ["A) 20°–30°", "B) 30°–40°", "C) 40°–50°", "D) 50°–60°"], answer: 2 },
+      { id: 24, q: "ভারতের কোন রাজ্যে Chilika Lake অবস্থিত?", options: ["A) ওড়িশা", "B) অন্ধ্রপ্রদেশ", "C) পশ্চিমবঙ্গ", "D) তামিলনাড়ু"], answer: 0 },
+      { id: 25, q: "পশ্চিমবঙ্গের কোন অঞ্চলে ল্যাটেরাইট মাটি বিশেষভাবে দেখা যায়?", options: ["A) দার্জিলিং পাহাড়", "B) পশ্চিমের মালভূমি অঞ্চল", "C) সুন্দরবন", "D) গঙ্গার বদ্বীপ"], answer: 1 },
+      { id: 26, q: "পশ্চিমবঙ্গের কোন স্থানটি বালুচর ও গঙ্গার ভাঙন-সৃষ্ট ভূ-প্রকৃতির জন্য বিশেষভাবে পরিচিত?", options: ["A) গঙ্গাসাগর", "B) মালদা", "C) দীঘা", "D) কালিম্পং"], answer: 1 },
+      { id: 27, q: "Darjeeling Himalayan Railway কোন UNESCO World Heritage-এর অংশ?", options: ["A) Indian Mountain Railways", "B) Eastern Himalayan Heritage", "C) Himalayan Cultural Railway", "D) Bengal Mountain Heritage"], answer: 0 },
+      { id: 28, q: "Jaldapara National Park কোন প্রাণীর জন্য বিশেষভাবে বিখ্যাত?", options: ["A) একশৃঙ্গ গণ্ডার", "B) সিংহ", "C) নীলগাই", "D) এশীয় সিংহ"], answer: 0 },
+      { id: 29, q: "2026 সালে চালু হওয়া PM-RAHAT scheme-এর মূল উদ্দেশ্য কী?", options: ["A) কৃষকদের ঋণ প্রদান", "B) সড়ক দুর্ঘটনার victims-কে cashless treatment প্রদান", "C) ছাত্রদের scholarship প্রদান", "D) প্রবীণদের pension প্রদান"], answer: 1 },
+      { id: 30, q: "দুর্গাপুর শিল্পাঞ্চল প্রধানত কোন নদী উপত্যকা অঞ্চলের সঙ্গে সম্পর্কিত?", options: ["A) তিস্তা", "B) দামোদর", "C) তোর্সা", "D) অজয়"], answer: 1 },
+      { id: 31, q: "পশ্চিমবঙ্গের উপকূলীয় অঞ্চলে প্রধানত কোন ধরনের প্রাকৃতিক দুর্যোগের ঝুঁকি বেশি?", options: ["A) ভূমিকম্প", "B) ঘূর্ণিঝড় ও জলোচ্ছ্বাস", "C) তুষারঝড়", "D) তুষারধস"], answer: 1 },
+      { id: 32, q: "ভারতীয় গণপরিষদের প্রথম বৈঠক কবে অনুষ্ঠিত হয়?", options: ["A) 9 December 1946", "B) 15 August 1947", "C) 26 November 1949", "D) 26 January 1950"], answer: 0 },
+      { id: 33, q: "ভারতীয় সংবিধানের কোন অংশটি Government of India Act, 1935 থেকে বিশেষভাবে প্রভাবিত?", options: ["A) Fundamental Rights", "B) Directive Principles", "C) Federal and administrative provisions", "D) Fundamental Duties"], answer: 2 },
+      { id: 34, q: "‘Estimates Committee’-তে কতজন সদস্য থাকেন?", options: ["A) 20", "B) 22", "C) 30", "D) 45"], answer: 2 },
+      { id: 35, q: "ভারতীয় সংবিধানের কোন বৈশিষ্ট্যটি Government of India Act, 1935 থেকে গুরুত্বপূর্ণভাবে গ্রহণ করা হয়েছিল?", options: ["A) Fundamental Rights", "B) Directive Principles", "C) Federal Scheme", "D) Fundamental Duties"], answer: 2 },
+      { id: 36, q: "‘Procedure established by law’ ধারণাটি ভারতের সংবিধান কোন দেশের সংবিধান থেকে গ্রহণ করেছে?", options: ["A) USA", "B) Japan", "C) UK", "D) Canada"], answer: 1 },
+      { id: 37, q: "সংসদের দুই কক্ষের যৌথ অধিবেশন কে আহ্বান করেন?", options: ["A) প্রধানমন্ত্রী", "B) লোকসভার স্পিকার", "C) রাষ্ট্রপতি", "D) উপরাষ্ট্রপতি"], answer: 2 },
+      { id: 38, q: "বিজয়নগর সাম্রাজ্যের বিখ্যাত শাসক কৃষ্ণদেব রায় কোন বংশের ছিলেন?", options: ["A) সঙ্গম", "B) সালুভ", "C) তুলুভ", "D) আরাভিদু"], answer: 2 },
+      { id: 39, q: "মৌলিক কর্তব্য সংবিধানের কোন অংশে রয়েছে?", options: ["A) Part III", "B) Part IVA", "C) Part IV", "D) Part V"], answer: 1 },
+      { id: 40, q: "ভারতের অর্থনৈতিক পরিকল্পনার ক্ষেত্রে Planning Commission-এর পরিবর্তে কোন প্রতিষ্ঠান গঠিত হয়?", options: ["A) Finance Commission", "B) NITI Aayog", "C) RBI", "D) SEBI"], answer: 1 },
+      { id: 41, q: "ভারতে Green Revolution-এর সঙ্গে কোন কৃষিবিজ্ঞানীর নাম বিশেষভাবে যুক্ত?", options: ["A) এম. এস. স্বামীনাথন", "B) ভার্গিস কুরিয়েন", "C) নরম্যান বোরলগ", "D) সি. সুব্রহ্মণ্যম"], answer: 0 },
+      { id: 42, q: "Public Finance-এর ক্ষেত্রে Primary Deficit কী?", options: ["A) Fiscal Deficit − Interest Payments", "B) Revenue Deficit − Interest Payments", "C) Fiscal Deficit + Interest Payments", "D) Budget Deficit − Revenue Deficit"], answer: 0 },
+      { id: 43, q: "ভারতের infrastructure sector-এর মধ্যে কোনটি পরিবহণ অবকাঠামোর অন্তর্ভুক্ত?", options: ["A) ব্যাংকিং", "B) সড়ক", "C) বীমা", "D) শিক্ষা"], answer: 1 },
+      { id: 44, q: "WTO-এর সদর দপ্তর কোথায়?", options: ["A) New York", "B) Geneva", "C) Washington DC", "D) Paris"], answer: 1 },
+      { id: 45, q: "Human Development Index (HDI) প্রকাশ করে কোন সংস্থা?", options: ["A) World Bank", "B) IMF", "C) UNDP", "D) WTO"], answer: 2 },
+      { id: 46, q: "ভারতের প্রথম মহিলা এভারেস্টজয়ী কে?", options: ["A) অরুণিমা সিনহা", "B) বাচেন্দ্রী পাল", "C) সন্তোষ যাদব", "D) প্রেমলতা আগরওয়াল"], answer: 1 },
+      { id: 47, q: "‘Dronacharya Award’ প্রধানত কাদের দেওয়া হয়?", options: ["A) খেলোয়াড়", "B) কোচ", "C) আম্পায়ার", "D) ক্রীড়া সাংবাদিক"], answer: 1 },
+      { id: 48, q: "2026 Commonwealth Games-এ ভারতীয় বক্সিং দলের অসাধারণ সাফল্যের সঙ্গে কোন খেলোয়াড়ের নাম বিশেষভাবে যুক্ত?", options: ["A) Sachin Siwach", "B) Neeraj Chopra", "C) Mirabai Chanu", "D) Gulveer Singh"], answer: 0 },
+      { id: 49, q: "‘Kathak’ নৃত্যশৈলীর ঐতিহাসিক বিকাশ প্রধানত কোন অঞ্চলের সঙ্গে যুক্ত?", options: ["A) উত্তর ভারত", "B) উত্তর-পূর্ব ভারত", "C) দক্ষিণ ভারত", "D) আন্দামান"], answer: 0 },
+      { id: 50, q: "‘Aditya-L1’ মিশনের প্রধান লক্ষ্য কী?", options: ["A) চাঁদের পৃষ্ঠ অধ্যয়ন", "B) সূর্য অধ্যয়ন", "C) মঙ্গল গ্রহ অধ্যয়ন", "D) শুক্র গ্রহ অধ্যয়ন"], answer: 1 },
+      { id: 51, q: "অজন্তা গুহাচিত্র প্রধানত কোন ধর্মীয় ঐতিহ্যের সঙ্গে সম্পর্কিত?", options: ["A) বৌদ্ধ", "B) জৈন", "C) শৈব", "D) বৈষ্ণব"], answer: 0 },
+      { id: 52, q: "‘Pattachitra’ শিল্পরীতি কোন রাজ্যের সঙ্গে বিশেষভাবে যুক্ত?", options: ["A) ওড়িশা", "B) পাঞ্জাব", "C) গুজরাট", "D) হরিয়ানা"], answer: 0 },
+      { id: 53, q: "ভারতের প্রথম উপগ্রহ ‘Aryabhata’ কোন সালে উৎক্ষেপিত হয়?", options: ["A) 1969", "B) 1975", "C) 1980", "D) 1984"], answer: 1 },
+      { id: 54, q: "Chandrayaan-3 মিশনের lander-এর নাম কী?", options: ["A) Pragyan", "B) Vikram", "C) Rohini", "D) Dhruv"], answer: 1 },
+      { id: 55, q: "CPU-এর কোন অংশ গাণিতিক ও যৌক্তিক কাজ সম্পাদন করে?", options: ["A) CU", "B) ALU", "C) RAM", "D) ROM"], answer: 1 },
+      { id: 56, q: "ভারতের প্রথম মহিলা রাজ্যসভা সদস্যদের মধ্যে অন্যতম এবং প্রথম মহিলা রাজ্যপাল হিসেবে পরিচিত ব্যক্তিটি কে?", options: ["A) সরোজিনী নাইডু", "B) সুচেতা কৃপালনী", "C) বিজয়লক্ষ্মী পণ্ডিত", "D) ইন্দিরা গান্ধি"], answer: 0 },
+      { id: 57, q: "কোনটি একটি ‘primary pollutant’?", options: ["A) Ozone", "B) PAN", "C) Sulphur dioxide", "D) Photochemical smog"], answer: 2 },
+      { id: 58, q: "PM SVANidhi মূলত কোন শ্রেণির মানুষের জন্য?", options: ["A) ক্ষুদ্র ও প্রান্তিক কৃষক", "B) রাস্তার হকার/Street Vendors", "C) সরকারি কর্মচারী", "D) বড় শিল্পপতি"], answer: 1 },
+      { id: 59, q: "‘In-situ conservation’-এর উদাহরণ কোনটি?", options: ["A) Zoo", "B) Botanical garden", "C) National Park", "D) Seed bank"], answer: 2 },
+      { id: 60, q: "বৈদ্যুতিক শক্তির commercial unit কোনটি?", options: ["A) Watt", "B) Joule", "C) Kilowatt-hour", "D) Volt"], answer: 2 },
+      { id: 61, q: "কোনো বস্তুর উপর net force শূন্য হলে বস্তুটি—", options: ["A) অবশ্যই স্থির থাকবে", "B) অবশ্যই ত্বরণযুক্ত হবে", "C) স্থির থাকতে পারে বা সমবেগে সরলরেখায় চলতে পারে", "D) বৃত্তাকার পথে চলবে"], answer: 2 },
+      { id: 62, q: "কোন যৌগটি সাধারণত একটি শক্তিশালী ক্ষার?", options: ["A) NaOH", "B) HCl", "C) H₂SO₄", "D) CH₃COOH"], answer: 0 },
+      { id: 63, q: "কোনো দ্রবণের pH = 3 হলে দ্রবণটি—", options: ["A) ক্ষারীয়", "B) নিরপেক্ষ", "C) অম্লীয়", "D) লবণাক্ত"], answer: 2 },
+      { id: 64, q: "Stainless steel মূলত কোন ধরনের মিশ্র ধাতু?", options: ["A) Copper + Zinc", "B) Iron + Chromium", "C) Aluminium + Copper", "D) Lead + Tin"], answer: 1 },
+      { id: 65, q: "মানবদেহে oxygen পরিবহনের প্রধান রঞ্জক পদার্থ কোনটি?", options: ["A) Myoglobin", "B) Haemoglobin", "C) Keratin", "D) Melanin"], answer: 1 },
+      { id: 66, q: "আলোর প্রতিসরণের সময় কোন রাশি অপরিবর্তিত থাকে?", options: ["A) বেগ", "B) তরঙ্গদৈর্ঘ্য", "C) কম্পাঙ্ক", "D) দিক"], answer: 2 },
+      { id: 67, q: "মানুষের দেহে oxygenated blood প্রধানত কোন রক্তনালীর মাধ্যমে হৃদয় থেকে শরীরে যায়?", options: ["A) Pulmonary artery", "B) Aorta", "C) Pulmonary vein", "D) Vena cava"], answer: 1 },
+      { id: 68, q: "‘Ecological succession’ বলতে কী বোঝায়?", options: ["A) একটি ecosystem-এর মধ্যে সময়ের সঙ্গে জীবসম্প্রদায়ের ক্রমাগত পরিবর্তন", "B) species-এর আকস্মিক বিলুপ্তি", "C) খাদ্যশৃঙ্খল ভেঙে যাওয়া", "D) মাটির ক্ষয়"], answer: 0 },
+      { id: 69, q: "কোন greenhouse gas-এর atmospheric concentration মানুষের কর্মকাণ্ডের কারণে ব্যাপকভাবে বৃদ্ধি পেয়েছে?", options: ["A) Oxygen", "B) Carbon dioxide", "C) Nitrogen", "D) Argon"], answer: 1 },
+      { id: 70, q: "‘Biological Oxygen Demand’ বা BOD বেশি হলে সাধারণত কী বোঝায়?", options: ["A) জল খুব বিশুদ্ধ", "B) জলে organic pollution বেশি", "C) জলে oxygen অত্যন্ত বেশি", "D) salinity কম"], answer: 1 },
+      { id: 71, q: "Ramsar Convention মূলত কোন বিষয়ে সম্পর্কিত?", options: ["A) মরুভূমি সংরক্ষণ", "B) জলাভূমি সংরক্ষণ", "C) পর্বত সংরক্ষণ", "D) সমুদ্রসীমা নির্ধারণ"], answer: 1 },
+      { id: 72, q: "‘Ex-situ conservation’-এর উদাহরণ কোনটি?", options: ["A) National Park", "B) Wildlife Sanctuary", "C) Seed Bank", "D) Biosphere Reserve-এর core zone"], answer: 2 },
+      { id: 73, q: "Montreal Protocol প্রধানত কোন পরিবেশগত সমস্যার মোকাবিলার সঙ্গে যুক্ত?", options: ["A) Global warming", "B) Ozone layer depletion", "C) Acid rain", "D) Deforestation"], answer: 1 },
+      { id: 74, q: "A-এর বর্তমান বয়স B-এর বর্তমান বয়সের চেয়ে বেশি। 6 বছর আগে A-এর বয়স B-এর বয়সের 4 গুণ ছিল এবং 6 বছর পরে A-এর বয়স B-এর বয়সের 2 গুণ হবে। A ও B-এর বর্তমান বয়স কত?", options: ["A) 28 বছর, 10 বছর", "B) 30 বছর, 12 বছর", "C) 32 বছর, 14 বছর", "D) 34 বছর, 16 বছর"], answer: 1 },
+      { id: 75, q: "20 লিটার 25% acid solution এবং 30 লিটার 40% acid solution মেশালে নতুন মিশ্রণে acid-এর শতকরা হার কত?", options: ["A) 32%", "B) 34%", "C) 35%", "D) 36%"], answer: 1 },
+      { id: 76, q: "A একটি কাজ 12 দিনে এবং B 18 দিনে করতে পারে। তারা একসঙ্গে 6 দিন কাজ করার পর অবশিষ্ট কাজ C 4 দিনে শেষ করে। C একা পুরো কাজটি কত দিনে করতে করত?", options: ["A) 18 দিন", "B) 20 দিন", "C) 24 দিন", "D) 30 দিন"], answer: 2 },
+      { id: 77, q: "972-কে কোন ক্ষুদ্রতম সংখ্যা দ্বারা গুণ করলে ফলাফল একটি পূর্ণবর্গ সংখ্যা হবে?", options: ["A) 2", "B) 3", "C) 6", "D) 9"], answer: 1 },
+      { id: 78, q: "একটি পাইপ 15 মিনিটে এবং অন্য একটি পাইপ 20 মিনিটে একটি tank পূর্ণ করতে পারে। প্রথম পাইপটি 5 মিনিট চালানোর পর বন্ধ করে দেওয়া হল এবং দ্বিতীয় পাইপটি চালু করা হল। Tank-টি মোট কত সময়ে পূর্ণ হবে?", options: ["A) 17 মিনিট", "B) 18⅓ মিনিট", "C) 20 মিনিট", "D) 21⅓ মিনিট"], answer: 1 },
+      { id: 79, q: "একটি সংখ্যার 30% তার 20-এর চেয়ে 80 বেশি। সংখ্যাটি কত?", options: ["A) 250", "B) 300", "C) 400", "D) 333⅓"], answer: 3 },
+      { id: 80, q: "একটি 180 মিটার দীর্ঘ ট্রেন একটি খুঁটি 12 সেকেন্ডে অতিক্রম করে। ট্রেনটির গতি কত?", options: ["A) 45 km/h", "B) 54 km/h", "C) 60 km/h", "D) 72 km/h"], answer: 1 },
+      { id: 81, q: "একটি ব্যক্তি সমান দূরত্বের দুটি অংশ যথাক্রমে 40 km/h ও 60 km/h বেগে অতিক্রম করল। পুরো যাত্রার গড় বেগ কত?", options: ["A) 45 km/h", "B) 48 km/h", "C) 50 km/h", "D) 52 km/h"], answer: 1 },
+      { id: 82, q: "150 মিটার দীর্ঘ একটি ট্রেন 250 মিটার দীর্ঘ একটি platform 20 সেকেন্ডে অতিক্রম করে। ট্রেনটির গতি কত?", options: ["A) 60 km/h", "B) 72 km/h", "C) 80 km/h", "D) 90 km/h"], answer: 1 },
+      { id: 83, q: "একটি দ্রব্যের ক্রয়মূল্য ₹800। Marked Price ক্রয়মূল্যের থেকে 25% বেশি এবং 10% discount দেওয়া হয়। লাভের হার কত?", options: ["A) 10%", "B) 12.5%", "C) 15%", "D) 20%"], answer: 1 },
+      { id: 84, q: "একজন অসাধু ব্যবসায়ী 1 kg-এর পরিবর্তে 800 g পণ্য দিয়ে 1 kg-এর দাম নেয়। সে প্রকৃত ক্রয়মূল্যের উপর 20% লাভের দাবি করে। তার প্রকৃত লাভের হার কত?", options: ["A) 40%", "B) 45%", "C) 50%", "D) 55%"], answer: 2 },
+      { id: 85, q: "একটি দ্রব্যের উপর পরপর 20% ও 10% discount দেওয়া হলে equivalent single discount কত?", options: ["A) 26%", "B) 28%", "C) 30%", "D) 32%"], answer: 1 },
+      { id: 86, q: "একটি ব্যক্তির বেতন প্রথমে 20% বৃদ্ধি এবং পরে 10% হ্রাস পেল। তার মোট বেতনে কী পরিবর্তন হল?", options: ["A) 8% বৃদ্ধি", "B) 8% হ্রাস", "C) 10% বৃদ্ধি", "D) কোনো পরিবর্তন হয়নি"], answer: 0 },
+      { id: 87, q: "কোনো সংখ্যার 40%-এর 30% = 72 হলে সংখ্যাটি কত?", options: ["A) 500", "B) 600", "C) 720", "D) 800"], answer: 1 },
+      { id: 88, q: "দুটি সংখ্যার অনুপাত 5 : 7। উভয়ের সঙ্গে 6 যোগ করলে অনুপাত 3 : 4 হয়। ছোট সংখ্যাটি কত?", options: ["A) 24", "B) 30", "C) 36", "D) 42"], answer: 1 },
+      { id: 89, q: "A ও B-এর মূলধনের অনুপাত 4 : 3। A 9 মাস এবং B 8 মাস ব্যবসায় থাকে। লাভের অনুপাত কত?", options: ["A) 3 : 2", "B) 4 : 3", "C) 3 : 4", "D) 9 : 8"], answer: 1 },
+      { id: 90, q: "₹20,000 মূলধনের উপর 8% বার্ষিক হারে 2 বছরের Compound Interest কত?", options: ["A) ₹3,200", "B) ₹3,328", "C) ₹3,360", "D) ₹3,400"], answer: 1 },
+      { id: 91, q: "8টি সংখ্যার গড় 24। একটি সংখ্যা বাদ দিয়ে তার পরিবর্তে 40 বসালে গড় 26 হয়। বাদ দেওয়া সংখ্যাটি কত?", options: ["A) 20", "B) 24", "C) 26", "D) 28"], answer: 1 },
+      { id: 92, q: "একটি নৌকার স্থির জলে বেগ 15 km/h এবং স্রোতের বেগ 3 km/h। নৌকাটি upstream-এ 84 km যেতে কত সময় নেবে?", options: ["A) 6 ঘণ্টা", "B) 7 ঘণ্টা", "C) 8 ঘণ্টা", "D) 9 ঘণ্টা"], answer: 1 },
+      { id: 93, q: "20 লিটার দুধ ও জলের মিশ্রণে দুধ ও জলের অনুপাত 3:2। দুধ ও জলের অনুপাত 1:1 করতে কত লিটার জল যোগ করতে হবে?", options: ["A) 2 লিটার", "B) 4 লিটার", "C) 6 লিটার", "D) 8 লিটার"], answer: 1 },
+      { id: 94, q: "4a5b সংখ্যাটি 72 দ্বারা বিভাজ্য হলে a ও b-এর সঠিক মান কোনটি?", options: ["A) a=5, b=2", "B) a=6, b=4", "C) a=7, b=2", "D) a=8, b=4"], answer: 2 },
+      { id: 95, q: "ভারতের অর্থনৈতিক উদারীকরণের সঙ্গে 1991 সালের কোন কমিটির সুপারিশ বিশেষভাবে গুরুত্বপূর্ণ?", options: ["A) নরসিংহম কমিটি", "B) সরকারিয়া কমিশন", "C) মণ্ডল কমিশন", "D) কোঠারি কমিশন"], answer: 0 },
+      { id: 96, q: "2026 Commonwealth Games-এ ভারত মোট কতটি পদক অর্জন করে?", options: ["A) 35", "B) 37", "C) 39", "D) 41"], answer: 2 },
+      { id: 97, q: "2026 Commonwealth Games-এ ভারত কোন খেলায় 10টি medal, যার মধ্যে 7টি Gold, জিতে বিশেষ সাফল্য দেখায়?", options: ["A) Boxing", "B) Weightlifting", "C) Judo", "D) Athletics"], answer: 0 },
+      { id: 98, q: "2026 Commonwealth Games-এ পুরুষদের 5000m-এ bronze জিতে কোন ভারতীয় অ্যাথলিট ইতিহাস সৃষ্টি করেন?", options: ["A) Gulveer Singh", "B) Tejaswin Shankar", "C) Ankush Panghal", "D) Sachin Siwach"], answer: 0 },
+      { id: 99, q: "25 July 2026-এর পর ভারতের Union Minister of Education হিসেবে কে দায়িত্ব গ্রহণ করেন?", options: ["A) Dharmendra Pradhan", "B) Pralhad Joshi", "C) Mansukh Mandaviya", "D) Shivraj Singh Chouhan"], answer: 1 },
+      { id: 100, q: "2026 সালের সেপ্টেম্বর অনুযায়ী ভারতের Chief Justice of India কে?", options: ["A) Justice B. R. Gavai", "B) Justice D. Y. Chandrachud", "C) Justice Surya Kant", "D) Justice Sanjiv Khanna"], answer: 2 }
+    ];
+
+    let timerInterval;
+    let timeRemaining = 90 * 60; // 90 minutes
+    let userData = { name: "", phone: "" };
+
+    // --- STUDENT ELIGIBILITY VERIFICATION ---
+    async function verifyAndStart() {
+      const name = document.getElementById("student-name").value.trim();
+      const phone = document.getElementById("student-phone").value.trim();
+      const err = document.getElementById("login-err");
+
+      if (!name || !phone) {
+        err.innerText = "Please fill in both Name and Mobile Number.";
+        return;
+      }
+
+      if (!ALLOWED_NUMBERS.includes(phone)) {
+        err.innerText = "Access Denied: Phone number not registered or eligible.";
+        return;
+      }
+
+      // Check Local & Firebase Attempts Count (Maximum 2 Allowed)
+      let localAttempts = parseInt(localStorage.getItem(`mock_attempts_${phone}`) || "0");
+      let remoteAttempts = 0;
+
+      try {
+        if (window.db) {
+          const userRef = window.doc(window.db, "students", phone);
+          const userSnap = await window.getDoc(userRef);
+          if (userSnap.exists()) {
+            remoteAttempts = userSnap.data().attempts || 0;
+          }
+        }
+      } catch (e) {
+        console.warn("Firebase lookup failed, falling back to local verification:", e);
+      }
+
+      const totalAttempts = Math.max(localAttempts, remoteAttempts);
+
+      if (totalAttempts >= 2) {
+        err.innerText = "Limit Reached: You have already attempted this test 2 times.";
+        return;
+      }
+
+      userData = { name, phone, attempts: totalAttempts + 1 };
+      localStorage.setItem(`mock_attempts_${phone}`, (totalAttempts + 1).toString());
+
+      // Update attempt count in Firebase
+      try {
+        if (window.db) {
+          const userRef = window.doc(window.db, "students", phone);
+          await window.setDoc(userRef, { name, phone, attempts: window.increment(1) }, { merge: true });
+        }
+      } catch (e) {
+        console.error("Firebase update failed:", e);
+      }
+
+      document.getElementById("disp-name").innerText = name;
+      document.getElementById("login-section").classList.add("hidden");
+      document.getElementById("exam-section").classList.remove("hidden");
+
+      renderQuestions();
+      startTimer();
+    }
+
+    // --- RENDER EXAM ---
+    function renderQuestions() {
+      const form = document.getElementById("quiz-form");
+      form.innerHTML = questions.map((q, i) => `
+        <div class="q-card" id="q-card-${i}">
+          <div class="q-title">${i + 1}. ${q.q}</div>
+          <div class="options">
+            ${q.options.map((opt, optIdx) => `
+              <label>
+                <input type="radio" name="q${i}" value="${optIdx}">
+                ${opt}
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- TIMER SYSTEM ---
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        let mins = Math.floor(timeRemaining / 60);
+        let secs = timeRemaining % 60;
+        document.getElementById("time-disp").innerText = 
+          `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert("Time's up! Submitting your test automatically.");
+          submitTest();
+        }
+      }, 1000);
+    }
+
+    // --- EVALUATION & SUBMISSION ---
+    function submitTest() {
+      clearInterval(timerInterval);
+
+      let correct = 0;
+      let wrong = 0;
+      let unattempted = 0;
+      const userAnswers = [];
+
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+          const val = parseInt(selected.value);
+          userAnswers.push(val);
+          if (val === q.answer) correct++;
+          else wrong++;
+        } else {
+          userAnswers.push(null);
+          unattempted++;
+        }
+      });
+
+      // Marks: +2 for correct, -0.5 for wrong
+      const finalScore = (correct * 2) - (wrong * 0.5);
+
+      document.getElementById("score-summary").innerHTML = `
+        <p><strong>Candidate Name:</strong> ${userData.name}</p>
+        <p><strong>Phone:</strong> ${userData.phone}</p>
+        <p><strong>Attempt:</strong> ${userData.attempts} of 2</p>
+        <p><strong>Final Score:</strong> ${finalScore} / 200</p>
+        <p><strong>Correct (+2 each):</strong> ${correct}</p>
+        <p><strong>Wrong (-0.5 each):</strong> ${wrong}</p>
+        <p><strong>Unattempted:</strong> ${unattempted}</p>
+      `;
+
+      // Save result to Google Sheet
+      saveToGoogleSheet({
+        name: userData.name,
+        phone: userData.phone,
+        score: finalScore,
+        correct: correct,
+        wrong: wrong,
+        unattempted: unattempted,
+        attemptNumber: userData.attempts
+      });
+
+      renderReview(userAnswers);
+      renderAnswerTable();
+
+      document.getElementById("exam-section").classList.add("hidden");
+      document.getElementById("result-section").classList.remove("hidden");
+    }
+
+    // --- SAVE RESULT DATA TO GOOGLE SHEETS ---
+    function saveToGoogleSheet(data) {
+      fetch(GOOGLE_SHEET_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).catch(err => console.error("Error pushing result to Google Sheets:", err));
+    }
+
+    // --- RENDER PREVIEW & MASTER ANSWER KEY TABLE ---
+    function renderReview(userAnswers) {
+      const container = document.getElementById("review-questions");
+      container.innerHTML = questions.map((q, i) => {
+        const userAns = userAnswers[i];
+        return `
+          <div class="q-card">
+            <div class="q-title">${i + 1}. ${q.q}</div>
+            <div class="options">
+              ${q.options.map((opt, optIdx) => {
+                let cls = "";
+                if (optIdx === q.answer) cls = "correct-opt";
+                else if (userAns === optIdx && userAns !== q.answer) cls = "wrong-opt";
+                
+                return `
+                  <div class="${cls}">
+                    ${optIdx === userAns ? "<strong>[Your Choice]</strong> " : ""}
+                    ${optIdx === q.answer ? "<strong>[Correct Answer]</strong> " : ""}
+                    ${opt}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAnswerTable() {
+      const tbody = document.getElementById("ans-table-body");
+      tbody.innerHTML = questions.map((q, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${q.options[q.answer]}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
