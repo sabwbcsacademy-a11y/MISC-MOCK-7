@@ -103,33 +103,6 @@
       .header-bar { position: relative; }
     }
   </style>
-
-  <!-- Firebase Modular SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // TODO: Replace with your actual Firebase Project Configuration
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Make Firebase functions globally accessible
-    window.db = db;
-    window.doc = doc;
-    window.setDoc = setDoc;
-    window.getDoc = getDoc;
-    window.updateDoc = updateDoc;
-    window.increment = increment;
-  </script>
 </head>
 <body>
 
@@ -145,7 +118,7 @@
         <label for="student-phone">Registered Phone Number</label>
         <input type="tel" id="student-phone" required placeholder="Enter 10-digit mobile number" />
       </div>
-      <button onclick="verifyAndStart()">Start Mock Test</button>
+      <button type="button" onclick="verifyAndStart()">Start Mock Test</button>
       <p id="login-err" style="color: var(--danger); font-weight: bold; margin-top: 10px;"></p>
     </div>
 
@@ -169,7 +142,7 @@
       <div id="score-summary"></div>
       
       <div class="no-print" style="margin-top: 15px;">
-        <button onclick="window.print()">Download / Print Preview PDF</button>
+        <button type="button" onclick="window.print()">Download / Print Preview PDF</button>
       </div>
 
       <div id="review-container" style="margin-top: 30px;">
@@ -196,14 +169,14 @@
     // Allowed Eligible Numbers (Purchased Students)
     const ALLOWED_NUMBERS = [
       "8759966414","8145053046","7421351001","7421351004","7421351009","7421351016","7421351025","7421351036",
-"7421351049","7421351064","7421351081","7421351100","7421351121","7421351144","8972752901","7076550802",
-"9749402798","9874772380","9093537364","9382719113","7001942262","7478315270","9800477643","7421791001",
-"7421791004","7421791009","7421791016","7421791025","7421791036","7421791049","7421791064","7421791081",
-"7421791100","7421791121","7421791144","9088990506","7029360599","8918901391","8016518417","9339393254",
-"6294038967","8167441990","9647585496","9681442002","9732051169","9547033989","8116090066","7364971515",
-"8370866731","9851362687","7872691497","9734643145","9851209305","8972639408","7001871581","7432068517",
-"8926717457","7908536664","9609611039","8327674562","9051665797","9163286400","6294592503","9064182595",
-"9593772769","9002293294","7029585292","7029585292"
+      "7421351049","7421351064","7421351081","7421351100","7421351121","7421351144","8972752901","7076550802",
+      "9749402798","9874772380","9093537364","9382719113","7001942262","7478315270","9800477643","7421791001",
+      "7421791004","7421791009","7421791016","7421791025","7421791036","7421791049","7421791064","7421791081",
+      "7421791100","7421791121","7421791144","9088990506","7029360599","8918901391","8016518417","9339393254",
+      "6294038967","8167441990","9647585496","9681442002","9732051169","9547033989","8116090066","7364971515",
+      "8370866731","9851362687","7872691497","9734643145","9851209305","8972639408","7001871581","7432068517",
+      "8926717457","7908536664","9609611039","8327674562","9051665797","9163286400","6294592503","9064182595",
+      "9593772769","9002293294","7029585292"
     ];
 
     // 100 Questions Loaded From Document
@@ -315,7 +288,7 @@
     let userData = { name: "", phone: "" };
 
     // --- STUDENT ELIGIBILITY VERIFICATION ---
-    async function verifyAndStart() {
+    function verifyAndStart() {
       const name = document.getElementById("student-name").value.trim();
       const phone = document.getElementById("student-phone").value.trim();
       const err = document.getElementById("login-err");
@@ -330,41 +303,17 @@
         return;
       }
 
-      // Check Local & Firebase Attempts Count (Maximum 2 Allowed)
+      // Check Local Attempts Count
       let localAttempts = parseInt(localStorage.getItem(`mock_attempts_${phone}`) || "0");
-      let remoteAttempts = 0;
 
-      try {
-        if (window.db) {
-          const userRef = window.doc(window.db, "students", phone);
-          const userSnap = await window.getDoc(userRef);
-          if (userSnap.exists()) {
-            remoteAttempts = userSnap.data().attempts || 0;
-          }
-        }
-      } catch (e) {
-        console.warn("Firebase lookup failed, falling back to local verification:", e);
-      }
-
-      const totalAttempts = Math.max(localAttempts, remoteAttempts);
-
-      if (totalAttempts >= 25) {
+      if (localAttempts >= 25) {
         err.innerText = "Limit Reached: You have already attempted this test 25 times.";
         return;
       }
 
-      userData = { name, phone, attempts: totalAttempts + 1 };
-      localStorage.setItem(`mock_attempts_${phone}`, (totalAttempts + 1).toString());
-
-      // Update attempt count in Firebase
-      try {
-        if (window.db) {
-          const userRef = window.doc(window.db, "students", phone);
-          await window.setDoc(userRef, { name, phone, attempts: window.increment(1) }, { merge: true });
-        }
-      } catch (e) {
-        console.error("Firebase update failed:", e);
-      }
+      const currentAttempt = localAttempts + 1;
+      userData = { name, phone, attempts: currentAttempt };
+      localStorage.setItem(`mock_attempts_${phone}`, currentAttempt.toString());
 
       document.getElementById("disp-name").innerText = name;
       document.getElementById("login-section").classList.add("hidden");
@@ -437,7 +386,7 @@
       document.getElementById("score-summary").innerHTML = `
         <p><strong>Candidate Name:</strong> ${userData.name}</p>
         <p><strong>Phone:</strong> ${userData.phone}</p>
-        <p><strong>Attempt:</strong> ${userData.attempts} of 2</p>
+        <p><strong>Attempt:</strong> ${userData.attempts} of 25</p>
         <p><strong>Final Score:</strong> ${finalScore} / 200</p>
         <p><strong>Correct (+2 each):</strong> ${correct}</p>
         <p><strong>Wrong (-0.5 each):</strong> ${wrong}</p>
