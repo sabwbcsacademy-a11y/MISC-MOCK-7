@@ -348,8 +348,8 @@
 
       const totalAttempts = Math.max(localAttempts, remoteAttempts);
 
-      if (totalAttempts >= 2) {
-        err.innerText = "Limit Reached: You have already attempted this test 2 times.";
+      if (totalAttempts >= 25) {
+        err.innerText = "Limit Reached: You have already attempted this test 25 times.";
         return;
       }
 
